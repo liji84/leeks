@@ -116,7 +116,7 @@ public abstract class AbstractTab {
         toolPanel = toolbarDecorator.createPanel();
         toolbarDecorator.getActionsPanel().add(refreshTimeLabel, BorderLayout.EAST);
         toolPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
-        panel.add(toolPanel, BorderLayout.NORTH);
+        panel.add(toolPanel, BorderLayout.CENTER);
     }
 
     /**

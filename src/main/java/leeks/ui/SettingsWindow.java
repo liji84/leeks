@@ -86,6 +86,7 @@ public class SettingsWindow implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
+        //FIXME: cron表达式格式错误会抛异常，应该有正确检查与提示的。
         String errorMsg = checkConfig();
         if (StringUtils.isNotEmpty(errorMsg)) {
             throw new ConfigurationException(errorMsg);

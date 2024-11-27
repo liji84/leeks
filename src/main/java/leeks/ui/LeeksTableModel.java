@@ -39,11 +39,12 @@ public class LeeksTableModel extends DefaultTableModel {
         this.table = table;
         this.refreshTimeLabel = refreshTimeLabel;
         PropertiesComponent instance = PropertiesComponent.getInstance();
-        String tableHeader = instance.getValue(config.getTableHeaderKey());
-        if (StringUtils.isBlank(tableHeader)) {
-            instance.setValue(config.getTableHeaderKey(), config.getTableHeaderValue());
-            tableHeader = config.getTableHeaderValue();
-        }
+//        String tableHeader = instance.getValue(config.getTableHeaderKey());
+//        if (StringUtils.isBlank(tableHeader)) {
+//            instance.setValue(config.getTableHeaderKey(), config.getTableHeaderValue());
+//            tableHeader = config.getTableHeaderValue();
+//        }
+        String tableHeader = config.getTableHeaderValue();
 
         columnNames = tableHeader.split(",");
         WindowUtils.reg(Arrays.asList(columnNames));
@@ -88,7 +89,7 @@ public class LeeksTableModel extends DefaultTableModel {
             }
         };
 
-        final List<String> columnNameList = Arrays.stream(columnNames).collect(Collectors.toList());
+        final List<String> columnNameList = Arrays.asList(columnNames);
         Arrays.asList("涨跌", "涨跌幅", "收益率", "收益", "估算涨跌").forEach(
                 e -> {
                     int index;

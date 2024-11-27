@@ -27,11 +27,11 @@ public class MainWindow implements ToolWindowFactory {
         //先加载代理
         loadProxySetting();
 
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = ContentFactory.getInstance();
         ContentManager contentManager = toolWindow.getContentManager();
         List<Content> contentList = TABS.stream().map(t -> contentFactory.createContent(t.getPanel(), t.getName(), false))
                 .peek(contentManager::addContent)
-                .collect(Collectors.toList());
+                .toList();
         if (StringUtils.isEmpty(PropertiesComponent.getInstance().getValue(Constants.Keys.FUNDS))) {
             // 没有配置基金数据，选择展示股票
             contentManager.setSelectedContent(contentList.get(1));
