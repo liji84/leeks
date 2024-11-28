@@ -42,7 +42,7 @@ public final class PropertiesUtils {
             return rawHeaders;
         }
 
-        String[] sortedData = instance.getValue(Constants.Keys.TABLE_HEADER_KEY_FUND).split(",");
+        String[] sortedData = property.split(",");
         List<String> sortedHeaders = new ArrayList<>(rawHeaders.size());
         rawHeaders = new ArrayList<>(rawHeaders);
         for (String header : sortedData) {
