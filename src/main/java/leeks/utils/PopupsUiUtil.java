@@ -126,8 +126,7 @@ public class PopupsUiUtil {
             @Override
             public void selectionChanged(TabInfo oldSelection, TabInfo newSelection) {
                 JComponent component = newSelection.getComponent();
-                if (component instanceof JLabel) {
-                    JLabel label = (JLabel) component;
+                if (component instanceof JLabel label) {
                     if (StringUtils.isNotBlank(label.getText())) {
                         try {
                             label.setIcon(new ImageIcon(new URL(label.getText())));
@@ -149,7 +148,7 @@ public class PopupsUiUtil {
          * 净值估算图
          */
         gsz("净值估算图");
-        private String desc;
+        private final String desc;
 
         FundShowType(String desc) {
             this.desc = desc;
@@ -178,8 +177,8 @@ public class PopupsUiUtil {
          */
         monthly("monthly", "月K线图");
 
-        private String type;
-        private String desc;
+        private final String type;
+        private final String desc;
 
         StockShowType(String type, String desc) {
             this.type = type;

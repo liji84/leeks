@@ -53,20 +53,20 @@ public class SettingsWindow implements Configurable {
         //开市时间每分钟
         cronExpressionFund.setText(instance.getValue(Constants.Keys.CRON_EXPRESSION_FUND,
                 String.join(";", Arrays.asList(
-                        "0 30-59 9 * * 2-6",
-                        "0 * 10 * * 2-6",
-                        "0 0-31 11 * * 2-6",
-                        "0 * 13-14 * * 2-6",
-                        "0 0-1 15 * * 2-6"))
+                        "0 30-59 9 ? * 2-6",
+                        "0 * 10 ? * 2-6",
+                        "0 0-31 11 ? * 2-6",
+                        "0 * 13-14 ? * 2-6",
+                        "0 0-1 15 ? * 2-6"))
         ));
         //开市时间每10秒
         cronExpressionStock.setText(instance.getValue(Constants.Keys.CRON_EXPRESSION_STOCK,
                 String.join(";", Arrays.asList(
-                        "*/10 30-59 9 * * 2-6",
-                        "*/10 * 10 * * 2-6",
-                        "*/10 0-31 11 * * 2-6",
-                        "*/10 * 13-14 * * 2-6",
-                        "*/10 0-1 15 * * 2-6"))
+                        "*/10 30-59 9 ? * 2-6",
+                        "*/10 * 10 ? * 2-6",
+                        "*/10 0-31 11 ? * 2-6",
+                        "*/10 * 13-14 ? * 2-6",
+                        "*/10 0-1 15 ? * 2-6"))
         ));
         //默认每10秒执行
         cronExpressionCoin.setText(instance.getValue(Constants.Keys.CRON_EXPRESSION_COIN, "*/10 * * * * ?"));
