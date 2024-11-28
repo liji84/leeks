@@ -1,18 +1,19 @@
 package leeks.handler;
 
 import com.google.common.base.Joiner;
+import leeks.bean.CoinBean;
+import leeks.ui.AbstractTab;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
-import leeks.ui.LeeksTableModel;
 
 import java.util.List;
 
 @Deprecated
-public class SinaCoinHandler extends CoinRefreshHandler {
+public class SinaCoinHandler extends AbstractHandler<CoinBean> {
     private final String URL = "http://hq.sinajs.cn/list=";
 
-    public SinaCoinHandler(LeeksTableModel tableModel) {
-        super(tableModel);
+    public SinaCoinHandler(AbstractTab<CoinBean>.TableContext tableContext) {
+        this.tableContext = tableContext;
     }
 
     @Override

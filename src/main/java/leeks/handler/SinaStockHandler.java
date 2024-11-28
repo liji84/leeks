@@ -3,7 +3,7 @@ package leeks.handler;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import leeks.bean.StockBean;
-import leeks.ui.LeeksTableModel;
+import leeks.ui.AbstractTab;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
 import org.apache.commons.lang.StringUtils;
@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SinaStockHandler extends StockRefreshHandler {
+public class SinaStockHandler extends AbstractHandler<StockBean> {
     private static final String URL = "http://hq.sinajs.cn/list=";
     private final Pattern DEFAULT_STOCK_PATTERN = Pattern.compile("var hq_str_(\\w+?)=\"(.*?)\";");
 
-    public SinaStockHandler(LeeksTableModel tableModel) {
-        super(tableModel);
+    public SinaStockHandler(AbstractTab<StockBean>.TableContext tableContext) {
+        this.tableContext = tableContext;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class SinaStockHandler extends StockRefreshHandler {
         }
 
         String text = refreshTimeList.stream().sorted().findFirst().orElse("");
-        SwingUtilities.invokeLater(() -> tableModel.getRefreshTimeLabel().setText(text));
+        SwingUtilities.invokeLater(() -> tableContext.getRefreshTimeLabel().setText(text));
     }
 
 }

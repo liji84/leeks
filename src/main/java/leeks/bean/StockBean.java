@@ -1,35 +1,40 @@
 package leeks.bean;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import leeks.utils.PinYinUtils;
 
 import java.util.Map;
 import java.util.Objects;
 
+@Data
+@NoArgsConstructor
 public class StockBean extends AbstractRowDataBean {
+    //"编码,股票名称,涨跌,涨跌幅,最高价,最低价,当前价,成本价,持仓,收益率,收益,更新时间"
+    @Column(value = "编码", sequence = 0)
     private String code;
+    @Column(value = "股票名称", sequence = 1, maybeGraying = true)
     private String name;
-    private String now;
+    @Column(value = "涨跌", sequence = 2, mayBeChangeMarked = true)
     private String change;//涨跌
+    @Column(value = "涨跌幅", sequence = 3, mayBeChangeMarked = true)
     private String changePercent;
-    private String time;
-    /**
-     * 最高价
-     */
+    @Column(value = "最高价", sequence = 4)
     private String max;
-    /**
-     * 最低价
-     */
+    @Column(value = "最低价", sequence = 5)
     private String min;
-
+    @Column(value = "当前价", sequence = 6)
+    private String now;
+    @Column(value = "成本价", sequence = 7)
     private String costPrise;//成本价
-//    private String cost;//成本
+    @Column(value = "持仓", sequence = 8)
     private String bonds;//持仓
+    @Column(value = "收益率", sequence = 9, mayBeChangeMarked = true)
     private String incomePercent;//收益率
+    @Column(value = "收益", sequence = 10, mayBeChangeMarked = true)
     private String income;//收益
-
-    public StockBean() {
-    }
+    @Column(value = "更新时间", sequence = 11)
+    private String time;
 
     //配置code同时配置成本价和成本值
     public StockBean(String code) {
@@ -38,12 +43,10 @@ public class StockBean extends AbstractRowDataBean {
             if (codeStr.length > 2) {
                 this.code = codeStr[0];
                 this.costPrise = codeStr[1];
-//                this.cost = codeStr[2];
                 this.bonds = codeStr[2];
             } else {
                 this.code = codeStr[0];
                 this.costPrise = "--";
-//                this.cost = "--";
                 this.bonds = "--";
             }
         } else {
@@ -59,115 +62,42 @@ public class StockBean extends AbstractRowDataBean {
             if (codeStr.length > 2) {
                 this.code = codeStr[0];
                 this.costPrise = codeStr[1];
-//                this.cost = codeStr[2];
                 this.bonds = codeStr[2];
             }
         }
     }
 
-    @Override
-    public String getCode() {
-        return code;
+
+    @Column("涨跌")
+    public String getChangeStr() {
+        String changeStr = "--";
+        if (this.getChange() != null) {
+            changeStr = this.getChange().startsWith("-") ? this.getChange() : "+" + this.getChange();
+        }
+        return changeStr;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    @Column("涨跌幅")
+    public String getChangePercentStr() {
+        String changePercentStr = "--";
+        if (this.getChangePercent() != null) {
+            changePercentStr = this.getChangePercent().startsWith("-") ? this.getChangePercent() : "+" + this.getChangePercent();
+        }
+        return changePercentStr + "%";
     }
 
-    public String getName() {
-        return name;
+    @Column("收益率")
+    public String getIncomePercentStr() {
+        return this.getCostPrise() != null ? this.getIncomePercent() + "%" : this.getIncomePercent();
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getNow() {
-        return now;
-    }
-
-    public void setNow(String now) {
-        this.now = now;
-    }
-
-    public String getChange() {
-        return change;
-    }
-
-    public void setChange(String change) {
-        this.change = change;
-    }
-
-    public String getChangePercent() {
-        return changePercent;
-    }
-
-    public void setChangePercent(String changePercent) {
-        this.changePercent = changePercent;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public String getMax() {
-        return max;
-    }
-
-    public void setMax(String max) {
-        this.max = max;
-    }
-
-    public String getMin() {
-        return min;
-    }
-
-    public void setMin(String min) {
-        this.min = min;
-    }
-
-    public String getCostPrise() {
-        return costPrise;
-    }
-
-    public void setCostPrise(String costPrise) {
-        this.costPrise = costPrise;
-    }
-
-    public String getBonds() {
-        return bonds;
-    }
-
-    public void setBonds(String bonds) {
-        this.bonds = bonds;
-    }
-
-    //    public String getCost() {
-//        return cost;
-//    }
-//
-//    public void setCost(String cost) {
-//        this.cost = cost;
-//    }
-
-    public String getIncomePercent() {
-        return incomePercent;
-    }
-
-    public void setIncomePercent(String incomePercent) {
-        this.incomePercent = incomePercent;
-    }
-
-    public String getIncome() {
-        return income;
-    }
-
-    public void setIncome(String income) {
-        this.income = income;
+    @Column("更新时间")
+    public String getUpdateTimeStr() {
+        String timeStr = "--";
+        if (this.getTime() != null) {
+            timeStr = this.getTime().substring(8);
+        }
+        return timeStr;
     }
 
     @Override
@@ -185,58 +115,5 @@ public class StockBean extends AbstractRowDataBean {
     @Override
     public int hashCode() {
         return Objects.hash(code);
-    }
-
-
-    /**
-     * 返回列名的VALUE 用作展示
-     *
-     * @param colums   字段名
-     * @param colorful 隐蔽模式
-     * @return 对应列名的VALUE值 无法匹配返回""
-     */
-    @Override
-    public String getValueByColumn(String colums, boolean colorful) {
-        switch (colums) {
-            case "编码":
-                return this.getCode();
-            case "股票名称":
-                return colorful ? this.getName() : PinYinUtils.toPinYin(this.getName());
-            case "当前价":
-                return this.getNow();
-            case "涨跌":
-                String changeStr = "--";
-                if (this.getChange() != null) {
-                    changeStr = this.getChange().startsWith("-") ? this.getChange() : "+" + this.getChange();
-                }
-                return changeStr;
-            case "涨跌幅":
-                String changePercentStr = "--";
-                if (this.getChangePercent() != null) {
-                    changePercentStr = this.getChangePercent().startsWith("-") ? this.getChangePercent() : "+" + this.getChangePercent();
-                }
-                return changePercentStr + "%";
-            case "最高价":
-                return this.getMax();
-            case "最低价":
-                return this.getMin();
-            case "成本价":
-                return this.getCostPrise();
-            case "持仓":
-                return this.getBonds();
-            case "收益率":
-                return this.getCostPrise() != null ? this.getIncomePercent() + "%" : this.getIncomePercent();
-            case "收益":
-                return this.getIncome();
-            case "更新时间":
-                String timeStr = "--";
-                if (this.getTime() != null) {
-                    timeStr = this.getTime().substring(8);
-                }
-                return timeStr;
-            default:
-                return "";
-
-        }
     }
 }

@@ -9,18 +9,17 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import leeks.constant.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MainWindow implements ToolWindowFactory {
 
-    public static final List<AbstractTab> TABS = Arrays.asList(new FundTab(), new StockTab(), new CoinTab());
+    public static final List<AbstractTab<?>> TABS = Arrays.asList(new FundTab(), new StockTab(), new CoinTab());
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {

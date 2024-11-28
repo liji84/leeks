@@ -1,25 +1,28 @@
 package leeks.handler;
 
-import leeks.bean.FundBean;
 import com.google.gson.Gson;
+import leeks.bean.FundBean;
 import leeks.constant.Constants;
-import leeks.ui.LeeksTableModel;
-import org.apache.commons.lang.StringUtils;
+import leeks.ui.AbstractTab;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
+import org.apache.commons.lang.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class TianTianFundHandler extends FundRefreshHandler {
+public class TianTianFundHandler extends AbstractHandler<FundBean> {
 
     private static final String URL = "http://fundgz.1234567.com.cn/js/%s.js?rt=%d";
 
     private static final Gson GSON = new Gson();
 
-    public TianTianFundHandler(LeeksTableModel tableModel) {
-        super(tableModel);
+    public TianTianFundHandler(AbstractTab<FundBean>.TableContext tableContext) {
+        this.tableContext = tableContext;
     }
 
     @Override

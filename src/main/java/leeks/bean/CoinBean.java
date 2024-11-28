@@ -1,75 +1,32 @@
 package leeks.bean;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
+@Data
+@NoArgsConstructor
 public class CoinBean extends AbstractRowDataBean {
+    //"编码,当前价,涨跌,涨跌幅,最高价,最低价,更新时间",
 
+    @Column(value = "编码", sequence = 0)
     private String symbol;
+    @Column(value = "当前价", sequence = 1)
     private double regularMarketPrice;
-    private double regularMarketDayHigh;
-    private double regularMarketDayLow;
+    @Column(value = "涨跌", sequence = 2, mayBeChangeMarked = true)
     private double regularMarketChange;
+    @Column(value = "最高价", sequence = 3)
+    private double regularMarketDayHigh;
+    @Column(value = "最低价", sequence = 4)
+    private double regularMarketDayLow;
+    @Column(value = "涨跌幅", sequence = 5, mayBeChangeMarked = true)
     private double regularMarketChangePercent;
+    @Column(value = "更新时间", sequence = 6)
     private long regularMarketTime;
-
 
     public CoinBean(String code) {
         this.symbol = code;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public double getRegularMarketPrice() {
-        return regularMarketPrice;
-    }
-
-    public void setRegularMarketPrice(double regularMarketPrice) {
-        this.regularMarketPrice = regularMarketPrice;
-    }
-
-    public double getRegularMarketDayHigh() {
-        return regularMarketDayHigh;
-    }
-
-    public void setRegularMarketDayHigh(double regularMarketDayHigh) {
-        this.regularMarketDayHigh = regularMarketDayHigh;
-    }
-
-    public double getRegularMarketDayLow() {
-        return regularMarketDayLow;
-    }
-
-    public void setRegularMarketDayLow(double regularMarketDayLow) {
-        this.regularMarketDayLow = regularMarketDayLow;
-    }
-
-    public double getRegularMarketChange() {
-        return regularMarketChange;
-    }
-
-    public void setRegularMarketChange(double regularMarketChange) {
-        this.regularMarketChange = regularMarketChange;
-    }
-
-    public double getRegularMarketChangePercent() {
-        return regularMarketChangePercent;
-    }
-
-    public void setRegularMarketChangePercent(double regularMarketChangePercent) {
-        this.regularMarketChangePercent = regularMarketChangePercent;
-    }
-
-    public long getTimeStamp() {
-        return regularMarketTime;
-    }
-
-    public void setTimeStamp(long timeStamp) {
-        this.regularMarketTime = timeStamp;
     }
 
     @Override
@@ -77,37 +34,29 @@ public class CoinBean extends AbstractRowDataBean {
         return symbol;
     }
 
-    /**
-     * 返回列名的VALUE 用作展示
-     * @param colums 字段名
-     * @param colorful 隐蔽模式
-     * @return 对应列名的VALUE值 无法匹配返回""
-     */
-    @Override
-    public String getValueByColumn(String colums, boolean colorful) {
-        switch (colums) {
-            case "编码":
-                return this.getSymbol();
-            case "涨跌":
-                return String.valueOf(this.getRegularMarketChange());
-            case "涨跌幅":
-                return decimalFormat.format(this.getRegularMarketChangePercent())+"%";
-            case "最高价":
-                return String.valueOf(this.getRegularMarketDayHigh());
-            case "最低价":
-                return String.valueOf(this.getRegularMarketDayLow());
-            case "当前价":
-                return String.valueOf(this.getRegularMarketPrice());
-            case "更新时间":
-                String timeStr = "--";
-                if (this.getTimeStamp()>0){
-                    timeStr = String.valueOf(this.getTimeStamp());
-                }
-                return timeStr;
-
-            default:
-                return "";
-
+    @Column(value = "更新时间")
+    public String getUpdateTimeStr() {
+        String timeStr = "--";
+        if (this.regularMarketTime != 0) {
+            timeStr = String.valueOf(this.regularMarketTime);
         }
+        return timeStr;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CoinBean bean = (CoinBean) o;
+        return Objects.equals(symbol, bean.symbol);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.symbol.hashCode();
     }
 }

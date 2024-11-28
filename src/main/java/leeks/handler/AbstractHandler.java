@@ -3,11 +3,13 @@ package leeks.handler;
 import com.intellij.ide.util.PropertiesComponent;
 import leeks.bean.AbstractRowDataBean;
 import leeks.constant.Constants;
-import leeks.ui.LeeksTableModel;
+import leeks.ui.AbstractTab;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Vector;
@@ -15,13 +17,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 抽象的数据查询handler类,提供了一些针对{@link leeks.ui.LeeksTableModel}的公共操作.
+ * 抽象的数据查询handler类
  */
-public abstract class AbstractHandler {
+public abstract class AbstractHandler<T extends AbstractRowDataBean> {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    protected LeeksTableModel tableModel;
+    protected AbstractTab<T>.TableContext tableContext;
 
     /**
      * 从网络更新数据, 增加了锁防止多cron表达式重复同步执行.
@@ -47,7 +49,20 @@ public abstract class AbstractHandler {
      *
      * @param code
      */
-    public abstract void setupTable(List<String> code);
+    public void setupTable(List<String> code) {
+        for (String s : code) {
+            try {
+                updateData(getParameterizedType().getConstructor(String.class).newInstance(s) );
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private Class<T> getParameterizedType() {
+        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+    }
 
     /**
      * 参考源码{@link DefaultTableModel#setValueAt}，此为直接更新行，提高点效率
@@ -56,20 +71,20 @@ public abstract class AbstractHandler {
      * @param rowData
      */
     protected void updateRow(int rowIndex, Vector<Object> rowData) {
-        tableModel.getDataVector().set(rowIndex, rowData);
+        tableContext.getTableModel().getDataVector().set(rowIndex, rowData);
         // 通知listeners刷新ui
-        tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
+        tableContext.getTableModel().fireTableRowsUpdated(rowIndex, rowIndex);
     }
 
     /**
      * 参考源码{@link DefaultTableModel#removeRow(int)}，此为直接清除全部行，提高点效率
      */
     public void clearRow() {
-        int size = tableModel.getDataVector().size();
+        int size = tableContext.getTableModel().getDataVector().size();
         if (0 < size) {
-            tableModel.getDataVector().clear();
+            tableContext.getTableModel().getDataVector().clear();
             // 通知listeners刷新ui
-            tableModel.fireTableRowsDeleted(0, size - 1);
+            tableContext.getTableModel().fireTableRowsDeleted(0, size - 1);
         }
     }
 
@@ -82,9 +97,9 @@ public abstract class AbstractHandler {
      * @return 如果不存在返回-1
      */
     protected int findRowIndex(int columnIndex, String value) {
-        int rowCount = tableModel.getRowCount();
+        int rowCount = tableContext.getTableModel().getRowCount();
         for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-            Object valueAt = tableModel.getValueAt(rowIndex, columnIndex);
+            Object valueAt = tableContext.getTableModel().getValueAt(rowIndex, columnIndex);
             if (StringUtils.equalsIgnoreCase(value, valueAt.toString())) {
                 return rowIndex;
             }
@@ -94,12 +109,12 @@ public abstract class AbstractHandler {
 
     protected void updateUI() {
         SwingUtilities.invokeLater(() -> {
-            tableModel.getRefreshTimeLabel().setText(LocalDateTime.now().format(Constants.TIME_FORMATTER));
-            tableModel.getRefreshTimeLabel().setToolTipText("最后刷新时间");
+            tableContext.getRefreshTimeLabel().setText(LocalDateTime.now().format(Constants.TIME_FORMATTER));
+            tableContext.getRefreshTimeLabel().setToolTipText("最后刷新时间");
         });
 
         PropertiesComponent instance = PropertiesComponent.getInstance();
-        tableModel.refreshCellColor(instance.getBoolean(Constants.Keys.COLORFUL));
+        tableContext.refreshCellColor(instance.getBoolean(Constants.Keys.COLORFUL));
     }
 
     protected void updateData(AbstractRowDataBean bean) {
@@ -111,11 +126,11 @@ public abstract class AbstractHandler {
             return;
         }
         // 获取行
-        int index = findRowIndex(tableModel.getCodeColumnIndex(), bean.getCode());
+        int index = findRowIndex(tableContext.getCodeColumnIndex(), bean.getCode());
         if (index >= 0) {
             updateRow(index, convertData);
         } else {
-            tableModel.addRow(convertData);
+            tableContext.getTableModel().addRow(convertData);
         }
     }
 
@@ -128,9 +143,9 @@ public abstract class AbstractHandler {
         boolean colorful = instance.getBoolean(Constants.Keys.COLORFUL);
 
         // 与columnNames中的元素保持一致
-        Vector<Object> v = new Vector<>(tableModel.getColumnNames().length);
-        for (int i = 0; i < tableModel.getColumnNames().length; i++) {
-            v.addElement(bean.getValueByColumn(tableModel.getColumnNames()[i], colorful));
+        Vector<Object> v = new Vector<>(tableContext.getTableHeaders().size());
+        for (String tableHeader : tableContext.getTableHeaders()) {
+            v.addElement(bean.getValueByColumn(tableHeader, colorful));
         }
         return v;
     }

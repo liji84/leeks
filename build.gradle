@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    testCompileOnly group: 'junit', name: 'junit', version: '4.12'
+    testCompileOnly group: 'junit', name: 'junit', version: '4.13.1'
     implementation group: 'com.github.promeg', name: 'tinypinyin', version: '2.0.3' // TinyPinyin核心包，约80KB
     implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2', {
      exclude group:'com.zaxxer'
@@ -26,6 +26,8 @@ dependencies {
      exclude group:'com.mchange'
     }
     compileOnly(group: 'commons-lang', name: 'commons-lang', version: '2.6')
+    compileOnly(group: 'org.projectlombok', name: 'lombok', version: '1.18.26')
+    annotationProcessor(group: 'org.projectlombok', name: 'lombok', version: '1.18.26')
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/

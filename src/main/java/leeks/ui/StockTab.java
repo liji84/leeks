@@ -5,12 +5,12 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.ui.awt.RelativePoint;
+import leeks.bean.StockBean;
+import leeks.bean.TabConfig;
 import leeks.constant.Constants;
 import leeks.handler.AbstractHandler;
 import leeks.handler.SinaStockHandler;
-import leeks.handler.StockRefreshHandler;
 import leeks.handler.TencentStockHandler;
-import leeks.bean.TabConfig;
 import leeks.utils.LogUtil;
 import leeks.utils.PopupsUiUtil;
 import org.jetbrains.annotations.NotNull;
@@ -22,15 +22,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 
-public class StockTab extends AbstractTab {
+public class StockTab extends AbstractTab<StockBean> {
 
-    protected JPanel panel;
     private static final String NAME = "Stock";
 
-    static StockRefreshHandler handler;
+    static AbstractHandler<StockBean> handler;
 
-    private static final TabConfig CONFIG = new TabConfig("stock_table_header_key2",
-            "编码,股票名称,涨跌,涨跌幅,最高价,最低价,当前价,成本价,持仓,收益率,收益,更新时间",
+    private static final TabConfig CONFIG = new TabConfig(Constants.Keys.TABLE_HEADER_KEY_STOCK,
+            getColumnHeaders(StockBean.class),
+            //"编码,股票名称,涨跌,涨跌幅,最高价,最低价,当前价,成本价,持仓,收益率,收益,更新时间",
             Constants.Keys.CRON_EXPRESSION_STOCK,
             Constants.Keys.STOCKS);
 
@@ -39,13 +39,13 @@ public class StockTab extends AbstractTab {
         handler = factoryHandler();
 
         // 只有股票才支持表格事件
-        table.addMouseListener(new MouseAdapter() {
+        tableContext.getTable().addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (table.getSelectedRow() < 0) {
+                if (tableContext.getTable().getSelectedRow() < 0) {
                     return;
                 }
-                String code = String.valueOf(table.getModel().getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), tableModel.getCodeColumnIndex()));
+                String code = String.valueOf(tableContext.getTable().getModel().getValueAt(tableContext.getTable().convertRowIndexToModel(tableContext.getTable().getSelectedRow()), tableContext.getCodeColumnIndex()));
                 if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() > 1) {
                     // 鼠标左键双击
                     try {
@@ -81,18 +81,18 @@ public class StockTab extends AbstractTab {
         apply();
     }
 
-    private StockRefreshHandler factoryHandler() {
+    private AbstractHandler<StockBean> factoryHandler() {
         boolean useSinaApi = PropertiesComponent.getInstance().getBoolean(Constants.Keys.STOCKS_SINA);
         if (useSinaApi) {
             if (handler instanceof SinaStockHandler) {
                 return handler;
             }
-            return new SinaStockHandler(tableModel);
+            return new SinaStockHandler(tableContext);
         }
         if (handler instanceof TencentStockHandler) {
             return handler;
         }
-        return new TencentStockHandler(tableModel);
+        return new TencentStockHandler(tableContext);
     }
 
     @Override

@@ -1,25 +1,25 @@
 package leeks.handler;
 
-import leeks.bean.CoinBean;
-import leeks.bean.YahooResponse;
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
+import leeks.bean.CoinBean;
+import leeks.ui.AbstractTab;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
-import leeks.ui.LeeksTableModel;
+import lombok.Data;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YahooCoinHandler extends CoinRefreshHandler {
+public class YahooCoinHandler extends AbstractHandler<CoinBean> {
     private static final String URL = "https://query1.finance.yahoo.com/v7/finance/quote?&symbols=";
     private static final String KEYS = "&fields=regularMarketChange,regularMarketChangePercent,regularMarketPrice,regularMarketTime,regularMarketDayHigh,regularMarketDayLow";
 
     private final Gson gson = new Gson();
 
-    public YahooCoinHandler(LeeksTableModel tableModel) {
-        super(tableModel);
+    public YahooCoinHandler(AbstractTab<CoinBean>.TableContext tableContext) {
+        this.tableContext = tableContext;
     }
 
     @Override
@@ -57,7 +57,23 @@ public class YahooCoinHandler extends CoinRefreshHandler {
         }
 
         String text = refreshTimeList.stream().sorted().findFirst().orElse("");
-        SwingUtilities.invokeLater(() -> tableModel.getRefreshTimeLabel().setText(text));
+        SwingUtilities.invokeLater(() -> tableContext.getRefreshTimeLabel().setText(text));
     }
 
+    @Data
+    public static class YahooResponse {
+        Result quoteResponse;
+
+        public YahooResponse() {
+        }
+
+        @Data
+        public static class Result{
+            public Result() {
+            }
+
+            private List<CoinBean> result;
+
+        }
+    }
 }

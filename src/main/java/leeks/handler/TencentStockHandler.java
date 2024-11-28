@@ -1,7 +1,7 @@
 package leeks.handler;
 
 import leeks.bean.StockBean;
-import leeks.ui.LeeksTableModel;
+import leeks.ui.AbstractTab;
 import leeks.utils.HttpClientPool;
 import org.apache.commons.lang.StringUtils;
 
@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TencentStockHandler extends StockRefreshHandler {
+public class TencentStockHandler extends AbstractHandler<StockBean> {
     private String urlPara;
     private HashMap<String, String[]> codeMap;
 
 
-    public TencentStockHandler(LeeksTableModel tableModel) {
-        super(tableModel);
+    public TencentStockHandler(AbstractTab<StockBean>.TableContext tableContext) {
+        this.tableContext = tableContext;
     }
 
     @Override

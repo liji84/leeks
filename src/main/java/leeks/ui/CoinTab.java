@@ -1,26 +1,27 @@
 package leeks.ui;
 
+import leeks.bean.CoinBean;
+import leeks.bean.TabConfig;
 import leeks.constant.Constants;
-import leeks.handler.CoinRefreshHandler;
 import leeks.handler.AbstractHandler;
 import leeks.handler.YahooCoinHandler;
-import leeks.bean.TabConfig;
 
 import java.util.List;
 
-public class CoinTab extends AbstractTab {
+public class CoinTab extends AbstractTab<CoinBean> {
     public static final String NAME = "Coin";
 
-    private static final TabConfig CONFIG = new TabConfig("coin_table_header_key2",
-            "编码,当前价,涨跌,涨跌幅,最高价,最低价,更新时间",
+    private static final TabConfig CONFIG = new TabConfig(Constants.Keys.TABLE_HEADER_KEY_COIN,
+             getColumnHeaders(CoinBean.class),
+            //"编码,当前价,涨跌,涨跌幅,最高价,最低价,更新时间",
             Constants.Keys.CRON_EXPRESSION_COIN,
             Constants.Keys.COINS);
 
-    static CoinRefreshHandler handler;
+    static AbstractHandler<CoinBean> handler;
 
     public CoinTab() {
         super();
-        handler = new YahooCoinHandler(tableModel);
+        handler = new YahooCoinHandler(tableContext);
         apply();
     }
 

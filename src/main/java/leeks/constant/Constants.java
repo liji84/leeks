@@ -24,7 +24,7 @@ public class Constants {
                     .setNameFormat("LEEKS-POOL-%d").build(),
             new ThreadPoolExecutor.DiscardOldestPolicy());
 
-    public final class Keys {
+    public static final class Keys {
         private Keys() {
         }
 
@@ -39,5 +39,9 @@ public class Constants {
         public static final String STOCKS_SINA = "key_stocks_sina";
         public static final String CLOSE_LOG = "key_close_log";
         public static final String PROXY = "key_proxy";
+
+        public static final String TABLE_HEADER_KEY_COIN = "coin_table_header_key2";
+        public static final String TABLE_HEADER_KEY_FUND = "fund_table_header_key2";
+        public static final String TABLE_HEADER_KEY_STOCK = "stock_table_header_key2";
     }
 }

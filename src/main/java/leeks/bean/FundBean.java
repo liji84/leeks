@@ -1,32 +1,43 @@
 package leeks.bean;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import leeks.utils.PinYinUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 
+@Data
+@NoArgsConstructor
 public class FundBean extends AbstractRowDataBean {
+    //"编码,基金名称,估算涨跌,当日净值,估算净值,持仓成本价,持有份额,收益率,收益,更新时间"
+
     @SerializedName("fundcode")
+    @Column(value = "编码", sequence = 0)
     private String fundCode;
     @SerializedName("name")
+    @Column(value = "基金名称", sequence = 1, maybeGraying = true)
     private String fundName;
-    private String jzrq;//净值日期
-    private String dwjz;//当日净值
-    private String gsz; //估算净值
+    @Column(value = "估算涨跌", sequence = 2, mayBeChangeMarked = true)
     private String gszzl;//估算涨跌百分比 即-0.42%
-    private String gztime;//gztime估值时间
-
+    @Column(value = "当日净值", sequence = 2)
+    private String dwjz;//当日净值
+    private String jzrq;//净值日期
+    @Column(value = "估算净值", sequence = 3)
+    private String gsz; //估算净值
+    @Column(value = "持仓成本价", sequence = 4)
     private String costPrise;//持仓成本价
+    @Column(value = "持有份额", sequence = 5)
     private String bonds;//持有份额
+    @Column(value = "收益率", sequence = 6, mayBeChangeMarked = true)
     private String incomePercent;//收益率
+    @Column(value = "收益", sequence = 7, mayBeChangeMarked = true)
     private String income;//收益
-
-    public FundBean() {
-    }
+    @Column(value = "更新时间", sequence = 8)
+    private String gztime;//gztime估值时间
 
     public FundBean(String fundCode) {
         if (StringUtils.isNotBlank(fundCode)) {
@@ -58,94 +69,6 @@ public class FundBean extends AbstractRowDataBean {
     }
 
 
-    public String getFundCode() {
-        return fundCode;
-    }
-
-    public void setFundCode(String fundCode) {
-        this.fundCode = fundCode;
-    }
-
-    public String getFundName() {
-        return fundName;
-    }
-
-    public void setFundName(String fundName) {
-        this.fundName = fundName;
-    }
-
-    public String getJzrq() {
-        return jzrq;
-    }
-
-    public void setJzrq(String jzrq) {
-        this.jzrq = jzrq;
-    }
-
-    public String getDwjz() {
-        return dwjz;
-    }
-
-    public void setDwjz(String dwjz) {
-        this.dwjz = dwjz;
-    }
-
-    public String getGsz() {
-        return gsz;
-    }
-
-    public void setGsz(String gsz) {
-        this.gsz = gsz;
-    }
-
-    public String getGszzl() {
-        return gszzl;
-    }
-
-    public void setGszzl(String gszzl) {
-        this.gszzl = gszzl;
-    }
-
-    public String getGztime() {
-        return gztime;
-    }
-
-    public void setGztime(String gztime) {
-        this.gztime = gztime;
-    }
-
-    public String getCostPrise() {
-        return costPrise;
-    }
-
-    public void setCostPrise(String costPrise) {
-        this.costPrise = costPrise;
-    }
-
-    public String getBonds() {
-        return bonds;
-    }
-
-    public void setBonds(String bonds) {
-        this.bonds = bonds;
-    }
-
-    public String getIncomePercent() {
-        return incomePercent;
-    }
-
-    public void setIncomePercent(String incomePercent) {
-        this.incomePercent = incomePercent;
-    }
-
-    public String getIncome() {
-        return income;
-    }
-
-    public void setIncome(String income) {
-        this.income = income;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -168,52 +91,36 @@ public class FundBean extends AbstractRowDataBean {
         return fundCode;
     }
 
-    /**
-     * 返回列名的VALUE 用作展示
-     *
-     * @param colums   字段名
-     * @param colorful 隐蔽模式
-     * @return 对应列名的VALUE值 无法匹配返回""
-     */
-    @Override
-    public String getValueByColumn(String colums, boolean colorful) {
-        switch (colums) {
-            case "编码":
-                return this.getFundCode();
-            case "基金名称":
-                return colorful ? this.getFundName() : PinYinUtils.toPinYin(this.getFundName());
-            case "估算净值":
-                return this.getGsz();
-            case "估算涨跌":
-                String gszzlStr = "--";
-                String gszzl = this.getGszzl();
-                if (gszzl != null) {
-                    gszzlStr = gszzl.startsWith("-") ? gszzl : "+" + gszzl;
-                }
-                return gszzlStr + "%";
-            case "更新时间":
-                String timeStr = this.getGztime();
-                if (timeStr == null) {
-                    timeStr = "--";
-                }
-                String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-                if (timeStr.startsWith(today)) {
-                    timeStr = timeStr.substring(timeStr.indexOf(" "));
-                }
-                return timeStr;
-            case "当日净值":
-                return this.getDwjz() + "[" + this.getJzrq() + "]";
-            case "持仓成本价":
-                return this.getCostPrise();
-            case "持有份额":
-                return this.getBonds();
-            case "收益率":
-                return this.getCostPrise() != null ? this.getIncomePercent() + "%" : this.getIncomePercent();
-            case "收益":
-                return this.getIncome();
-            default:
-                return "";
-
+    @Column("估值涨跌")
+    private String getGzzdlStr() {
+        String gszzlStr = "--";
+        String gszzl = this.getGszzl();
+        if (gszzl != null) {
+            gszzlStr = gszzl.startsWith("-") ? gszzl : "+" + gszzl;
         }
+        return gszzlStr + "%";
+    }
+
+    @Column("更新时间")
+    private String getUpdateTimeStr() {
+        String timeStr = this.getGztime();
+        if (timeStr == null) {
+            timeStr = "--";
+        }
+        String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        if (timeStr.startsWith(today)) {
+            timeStr = timeStr.substring(timeStr.indexOf(" "));
+        }
+        return timeStr;
+    }
+
+    @Column("收益率")
+    private String getIncomePercentStr() {
+        return this.getCostPrise() != null ? this.getIncomePercent() + "%" : this.getIncomePercent();
+    }
+
+    @Column("当前净值")
+    private String getDwjzStr() {
+        return this.getDwjz() + "[" + this.getJzrq() + "]";
     }
 }
