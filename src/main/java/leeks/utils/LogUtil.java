@@ -1,15 +1,15 @@
 package leeks.utils;
 
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.notification.*;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import leeks.constant.Constants;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
-
 import javax.swing.*;
+import java.util.ArrayList;
 
 public class LogUtil {
     // 解决github中的bug #122，暂时没有其它方案监听到project的变化，先预存进行逻辑校验
@@ -41,14 +41,15 @@ public class LogUtil {
     public static void info(String text){
         boolean closeLog = PropertiesComponent.getInstance().getBoolean(Constants.Keys.CLOSE_LOG);
         if (!closeLog){
-//            PluginManager.getLogger().info(text);
-            new NotificationGroup("Gradle sync", NotificationDisplayType.NONE, true).createNotification(text, MessageType.INFO).notify(getProject());
+            NotificationGroupManager.getInstance().getNotificationGroup("Leeks Notification Group")
+                    .createNotification(text, MessageType.INFO)
+                    .notify(getProject());
         }
     }
 
     public static void notify(String text,boolean success){
         NotificationGroupManager.getInstance().getNotificationGroup("Leeks Notification Group")
-                .createNotification(text, success?NotificationType.INFORMATION:NotificationType.WARNING)
+                .createNotification(text, success ? MessageType.INFO : MessageType.WARNING)
                 .notify(getProject());
     }
 }

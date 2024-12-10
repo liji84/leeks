@@ -3,6 +3,7 @@ package leeks.quartz;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.quartz.*;
@@ -58,6 +59,7 @@ public class QuartzManager {
      */
     public static boolean checkCronExpression(String cronExpression) {
         try {
+            Logger.getLogger("QUARTZ").severe(cronExpression);
             new CronExpression(cronExpression);
             return true;
         } catch (ParseException e) {

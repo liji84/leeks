@@ -3,11 +3,14 @@ package leeks.ui;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.ActionToolbarPosition;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
+import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.ui.AnActionButton;
+import com.intellij.ui.CommonActionsPanel;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.JBUI;
 import leeks.bean.AbstractRowDataBean;
 import leeks.bean.Column;
 import leeks.bean.TabConfig;
@@ -25,7 +28,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -48,9 +50,9 @@ public abstract class AbstractTab<T extends AbstractRowDataBean> {
 
 
     protected JPanel toolPanel;
-    protected AnActionButton refreshAction;
-    protected AnActionButton pauseAction;
-    protected AnActionButton resumeAction;
+    protected AnAction refreshAction;
+    protected AnAction pauseAction;
+    protected AnAction resumeAction;
 
     /**
      * @return 选项卡的名字
@@ -59,50 +61,79 @@ public abstract class AbstractTab<T extends AbstractRowDataBean> {
 
     public AbstractTab() {
         panel = new JPanel();
-        panel.setBorder(new EmptyBorder(0, 0, 0, 0));
+        panel.setBorder(JBUI.Borders.empty());
         panel.setLayout(new BorderLayout());
 
         tableContext = createTable(getConfig());
 
-        refreshAction = new AnActionButton("立刻刷新当前表格数据", AllIcons.Actions.Refresh) {
+        refreshAction = new AnAction("立刻刷新当前表格数据", null, AllIcons.Actions.Refresh) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                this.setEnabled(false);
+                e.getPresentation().setEnabled(false);
+                panel.updateUI();
                 refresh();
-                this.setEnabled(true);
+                e.getPresentation().setEnabled(true);
                 panel.updateUI();
             }
         };
-        pauseAction = new AnActionButton("停止刷新当前表格数据", AllIcons.Actions.Pause) {
+        pauseAction = new AnAction("停止刷新当前表格数据", null, AllIcons.Actions.Pause) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 stop();
-                this.setVisible(false);
-                resumeAction.setVisible(true);
+                this.getTemplatePresentation().setVisible(false);
+                resumeAction.getTemplatePresentation().setVisible(true);
                 panel.updateUI();
             }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setVisible(this.getTemplatePresentation().isVisible());
+            }
+
+            @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.BGT;
+            }
         };
-        resumeAction = new AnActionButton("恢复刷新当前表格数据", AllIcons.Actions.Resume) {
+        resumeAction = new AnAction("恢复刷新当前表格数据", null, AllIcons.Actions.Resume) {
             {
-                this.setVisible(false);
+                this.getTemplatePresentation().setVisible(false);
             }
 
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
                 start();
-                this.setVisible(false);
-                pauseAction.setVisible(true);
+                this.getTemplatePresentation().setVisible(false);
+                pauseAction.getTemplatePresentation().setVisible(true);
                 panel.updateUI();
+            }
+
+            @Override
+            public void update(@NotNull AnActionEvent e) {
+                e.getPresentation().setVisible(this.getTemplatePresentation().isVisible());
+            }
+
+            @Override
+            public @NotNull ActionUpdateThread getActionUpdateThread() {
+                return ActionUpdateThread.BGT;
             }
         };
         ToolbarDecorator toolbarDecorator = ToolbarDecorator.createDecorator(tableContext.getTable())
-                .addExtraAction(refreshAction)
-                .addExtraAction(pauseAction)
-                .addExtraAction(resumeAction)
+                .addExtraActions(refreshAction, pauseAction, resumeAction)
                 .setToolbarPosition(ActionToolbarPosition.TOP);
         toolPanel = toolbarDecorator.createPanel();
-        toolbarDecorator.getActionsPanel().add(tableContext.refreshTimeLabel, BorderLayout.EAST);
-        toolPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+        CommonActionsPanel actionsPanel = toolbarDecorator.getActionsPanel();
+        // 在工具栏的按钮条外面再套一层panel，并加入文本框
+//        Component actionToolbar = actionsPanel.getComponent(0);
+//        actionsPanel.remove(0);
+//        JPanel newActionToolbar = new JPanel();
+//        newActionToolbar.setLayout(new FlowLayout(FlowLayout.LEFT));
+//        newActionToolbar.add(actionToolbar);
+//        newActionToolbar.add(new JTextField(20));
+//        actionsPanel.add(newActionToolbar, BorderLayout.CENTER);
+        // 添加刷新时间
+        actionsPanel.add(tableContext.refreshTimeLabel, BorderLayout.EAST);
+        toolPanel.setBorder(JBUI.Borders.empty());
         panel.add(toolPanel, BorderLayout.CENTER);
     }
 
@@ -111,7 +142,7 @@ public abstract class AbstractTab<T extends AbstractRowDataBean> {
 
         JLabel refreshTimeLabel = new JLabel();
         refreshTimeLabel.setToolTipText("最后刷新时间");
-        refreshTimeLabel.setBorder(new EmptyBorder(0, 0, 0, 5));
+        refreshTimeLabel.setBorder(JBUI.Borders.emptyRight(5));
 
         JBTable table = new JBTable();
 
@@ -220,7 +251,6 @@ public abstract class AbstractTab<T extends AbstractRowDataBean> {
                 .sorted(Comparator.comparingInt(Column::sequence))
                 .map(Column::value).distinct().toList();
     }
-
 
     private Class<T> getParameterizedType() {
         return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];

@@ -42,7 +42,7 @@ public class HandlerJob implements Job {
             Constants.EXECUTOR_SERVICE.submit(() -> {
                 try {
                     List<String> codes = (List<String>) mergedJobDataMap.get(KEY_CODES);
-                    ((AbstractHandler) handler).handle(codes);
+                    ((AbstractHandler<?>) handler).handle(codes);
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     LogUtil.info(String.format("%s 运行 %s ;下一次运行时间为 %s",
                             simpleDateFormat.format(new Date()),

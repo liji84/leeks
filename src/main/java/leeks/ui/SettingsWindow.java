@@ -4,16 +4,17 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import leeks.constant.Constants;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.Nullable;
 import leeks.quartz.QuartzManager;
 import leeks.utils.HttpClientPool;
 import leeks.utils.LogUtil;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class SettingsWindow implements Configurable {
     private JPanel panel1;
@@ -68,8 +69,8 @@ public class SettingsWindow implements Configurable {
                         "*/10 * 13-14 ? * 2-6",
                         "*/10 0-1 15 ? * 2-6"))
         ));
-        //默认每10秒执行
-        cronExpressionCoin.setText(instance.getValue(Constants.Keys.CRON_EXPRESSION_COIN, "*/10 * * * * ?"));
+        //默认每60秒执行
+        cronExpressionCoin.setText(instance.getValue(Constants.Keys.CRON_EXPRESSION_COIN, "0 * * * * ?"));
         //代理设置
         inputProxy.setText(instance.getValue(Constants.Keys.PROXY));
         proxyTestButton.addActionListener(actionEvent -> {
@@ -86,11 +87,12 @@ public class SettingsWindow implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        //FIXME: cron表达式格式错误会抛异常，应该有正确检查与提示的。
         String errorMsg = checkConfig();
         if (StringUtils.isNotEmpty(errorMsg)) {
+            LogUtil.notify(errorMsg, false);
             throw new ConfigurationException(errorMsg);
         }
+
         PropertiesComponent instance = PropertiesComponent.getInstance();
         instance.setValue(Constants.Keys.FUNDS, textAreaFund.getText());
         instance.setValue(Constants.Keys.STOCKS, textAreaStock.getText());
@@ -121,7 +123,7 @@ public class SettingsWindow implements Configurable {
             httpClientPool.get("https://www.baidu.com");
             LogUtil.notify("代理测试成功!请保存", true);
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getLogger(SettingsWindow.class.getCanonicalName()).severe(e.getMessage());
             LogUtil.notify("测试代理异常!", false);
         }
     }
@@ -167,28 +169,11 @@ public class SettingsWindow implements Configurable {
      * @return 返回提示的错误信息
      */
     private String checkConfig() {
-        StringBuilder errorMsg = new StringBuilder();
-        errorMsg.append(getConfigList(cronExpressionFund.getText(), ";").stream().map(s -> {
-            if (!QuartzManager.checkCronExpression(s)) {
-                return "Fund请配置正确的cron表达式[" + s + "]、";
-            } else {
-                return "";
-            }
-        }).collect(Collectors.joining()));
-        errorMsg.append(getConfigList(cronExpressionStock.getText(), ";").stream().map(s -> {
-            if (!QuartzManager.checkCronExpression(s)) {
-                return "Stock请配置正确的cron表达式[" + s + "]、";
-            } else {
-                return "";
-            }
-        }).collect(Collectors.joining()));
-        errorMsg.append(getConfigList(cronExpressionCoin.getText(), ";").stream().map(s -> {
-            if (!QuartzManager.checkCronExpression(s)) {
-                return "Coin请配置正确的cron表达式[" + s + "]、";
-            } else {
-                return "";
-            }
-        }).collect(Collectors.joining()));
-        return errorMsg.toString();
+        List<String> errors = Stream.of(Stream.of(cronExpressionFund.getText().split(";")).map(s -> QuartzManager.checkCronExpression(s) ? null : "Fund请配置正确的cron表达式[" + s + "]"),
+                Stream.of(cronExpressionCoin.getText().split(";")).map(s -> QuartzManager.checkCronExpression(s) ? null : "Coin请配置正确的cron表达式[" + s + "]"),
+                        Stream.of(cronExpressionStock.getText().split(";")).map(s -> QuartzManager.checkCronExpression(s) ? null : "Stock请配置正确的cron表达式[" + s + "]")
+                ).flatMap(e -> e)
+                .filter(StringUtils::isNotEmpty).toList();
+        return errors.isEmpty() ? "" : String.join("、", errors) + "。";
     }
 }
